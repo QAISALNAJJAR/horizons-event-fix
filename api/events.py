@@ -1,10 +1,17 @@
 from http.server import BaseHTTPRequestHandler
 import json
 import os
+import urllib.request
+import urllib.error
 
 API_PASSWORD = 'horizons2026'
 
-# Default events data
+# JSONBin.io free API - sign up at https://jsonbin.io to get your bin ID
+# This is a free JSON storage service
+JSONBIN_ID = '6a96ed54f5f4af5e295d224b'
+JSONBIN_API_KEY = '$2a$10$f/iO1sJfQqWXCMn1A494BuUH.qTmIzEyc6EesZB2wnLcmXXffXBUy'
+JSONBIN_URL = f'https://api.jsonbin.io/v3/b/{JSONBIN_ID}'
+
 DEFAULT_EVENTS = {
     "events": [
         {
@@ -16,23 +23,35 @@ DEFAULT_EVENTS = {
 }
 
 def get_events_data():
-    """Get events from Vercel Blob or fallback to default."""
+    """Get events from JSONBin.io or fallback to default."""
     try:
-        from vercel_blob import Blob
-        blob = Blob()
-        data = blob.get('events.json')
-        if data:
-            return json.loads(data) if isinstance(data, str) else data
+        req = urllib.request.Request(
+            f'{JSONBIN_URL}/latest',
+            headers={
+                'X-Access-Key': JSONBIN_API_KEY,
+                'X-Bin-Meta': 'false'
+            }
+        )
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            return data.get('record', data)
     except:
         pass
     return DEFAULT_EVENTS.copy()
 
 def save_events_data(data):
-    """Save events to Vercel Blob."""
+    """Save events to JSONBin.io."""
     try:
-        from vercel_blob import Blob
-        blob = Blob()
-        blob.put('events.json', json.dumps(data).encode(), overwrite=True)
+        req = urllib.request.Request(
+            JSONBIN_URL,
+            data=json.dumps(data).encode(),
+            method='PUT',
+            headers={
+                'Content-Type': 'application/json',
+                'X-Access-Key': JSONBIN_API_KEY
+            }
+        )
+        urllib.request.urlopen(req, timeout=5)
     except:
         pass
 
