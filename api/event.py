@@ -1,6 +1,5 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import os
 
 # Default events data
 DEFAULT_EVENTS = {
@@ -14,11 +13,11 @@ DEFAULT_EVENTS = {
 }
 
 def get_events_data():
-    """Get events from Vercel KV or fallback to default."""
+    """Get events from Vercel Blob or fallback to default."""
     try:
-        from vercel_kv import KV
-        kv = KV()
-        data = kv.get('events_data')
+        from vercel_blob import Blob
+        blob = Blob()
+        data = blob.get('events.json')
         if data:
             return json.loads(data) if isinstance(data, str) else data
     except:

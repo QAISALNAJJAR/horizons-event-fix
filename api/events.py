@@ -4,7 +4,7 @@ import os
 
 API_PASSWORD = 'horizons2026'
 
-# Default events data (used as initial data)
+# Default events data
 DEFAULT_EVENTS = {
     "events": [
         {
@@ -16,11 +16,11 @@ DEFAULT_EVENTS = {
 }
 
 def get_events_data():
-    """Get events from Vercel KV or fallback to default."""
+    """Get events from Vercel Blob or fallback to default."""
     try:
-        from vercel_kv import KV
-        kv = KV()
-        data = kv.get('events_data')
+        from vercel_blob import Blob
+        blob = Blob()
+        data = blob.get('events.json')
         if data:
             return json.loads(data) if isinstance(data, str) else data
     except:
@@ -28,11 +28,11 @@ def get_events_data():
     return DEFAULT_EVENTS.copy()
 
 def save_events_data(data):
-    """Save events to Vercel KV."""
+    """Save events to Vercel Blob."""
     try:
-        from vercel_kv import KV
-        kv = KV()
-        kv.set('events_data', json.dumps(data))
+        from vercel_blob import Blob
+        blob = Blob()
+        blob.put('events.json', json.dumps(data).encode(), overwrite=True)
     except:
         pass
 

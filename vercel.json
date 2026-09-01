@@ -14,9 +14,5 @@
     { "src": "/api/event", "dest": "/api/event.py" },
     { "src": "/api/events", "dest": "/api/events.py" },
     { "src": "/", "dest": "/dashboard/index.html" }
-  ],
-  "env": {
-    "KV_REST_API_URL": "@kv-rest-api-url",
-    "KV_REST_API_TOKEN": "@kv-rest-api-token"
-  }
+  ]
 }
