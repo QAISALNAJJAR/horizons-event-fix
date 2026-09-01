@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizons Event Manager</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+        .container { background: #16213e; padding: 2rem; border-radius: 12px; width: 100%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+        h1 { text-align: center; margin-bottom: 1.5rem; color: #e94560; }
+        .hidden { display: none !important; }
+        input, button { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; font-size: 16px; }
+        input { background: #0f3460; color: #eee; outline: none; }
+        input:focus { box-shadow: 0 0 0 2px #e94560; }
+        button { background: #e94560; color: white; cursor: pointer; font-weight: 600; transition: opacity 0.2s; }
+        button:hover { opacity: 0.9; }
+        button.secondary { background: #0f3460; }
+        .event-list { margin: 1rem 0; }
+        .event-item { background: #0f3460; padding: 12px; margin: 8px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .event-item.active { border: 2px solid #e94560; }
+        .event-item .title { font-weight: 500; }
+        .event-item .id { font-size: 12px; color: #888; }
+        .event-item .actions button { width: auto; padding: 6px 12px; margin: 0 4px; font-size: 14px; }
+        .badge { background: #e94560; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+        .logout { position: absolute; top: 20px; right: 20px; width: auto; padding: 8px 16px; }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen" class="container">
+        <h1>🔐 Event Manager</h1>
+        <input type="password" id="passwordInput" placeholder="Enter password" onkeypress="if(event.key==='Enter')login()">
+        <button onclick="login()">Login</button>
+        <p id="loginError" style="color: #e94560; text-align: center; margin-top: 10px;" class="hidden">Wrong password!</p>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="hidden">
+        <button class="logout" onclick="logout()">Logout</button>
+        <div class="container">
+            <h1>📅 Event Manager</h1>
+            
+            <input type="text" id="eventIdInput" placeholder="Event ID (e.g., 3b68b316-6f6d-4a40-ae99-1476da708be8)">
+            <input type="text" id="eventTitleInput" placeholder="Event Title (optional)">
+            <button onclick="addEvent()">Add Event</button>
+            
+            <div class="event-list" id="eventList"></div>
+        </div>
+    </div>
+
+    <script>
+        const PASSWORD = 'horizons2026';
+        const STORAGE_KEY = 'horizons_events';
+        const ACTIVE_KEY = 'horizons_active';
+
+        let events = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+        let activeEventId = localStorage.getItem(ACTIVE_KEY) || null;
+
+        function login() {
+            const input = document.getElementById('passwordInput').value;
+            if (input === PASSWORD) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                renderEvents();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('passwordInput').value = '';
+        }
+
+        function save() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+            localStorage.setItem(ACTIVE_KEY, activeEventId);
+        }
+
+        function addEvent() {
+            const id = document.getElementById('eventIdInput').value.trim();
+            const title = document.getElementById('eventTitleInput').value.trim() || 'Untitled Event';
+            
+            if (!id) return alert('Please enter an event ID');
+            
+            const existing = events.find(e => e.id === id);
+            if (existing) {
+                existing.title = title;
+            } else {
+                events.push({ id, title });
+            }
+            
+            if (!activeEventId) activeEventId = id;
+            
+            save();
+            renderEvents();
+            document.getElementById('eventIdInput').value = '';
+            document.getElementById('eventTitleInput').value = '';
+        }
+
+        function removeEvent(id) {
+            events = events.filter(e => e.id !== id);
+            if (activeEventId === id) activeEventId = events.length > 0 ? events[0].id : null;
+            save();
+            renderEvents();
+        }
+
+        function setActive(id) {
+            activeEventId = id;
+            save();
+            renderEvents();
+        }
+
+        function renderEvents() {
+            const list = document.getElementById('eventList');
+            if (events.length === 0) {
+                list.innerHTML = '<p style="text-align:center;color:#888;">No events added yet</p>';
+                return;
+            }
+            
+            list.innerHTML = events.map(e => `
+                <div class="event-item ${e.id === activeEventId ? 'active' : ''}">
+                    <div>
+                        <div class="title">${e.title} ${e.id === activeEventId ? '<span class="badge">ACTIVE</span>' : ''}</div>
+                        <div class="id">${e.id}</div>
+                    </div>
+                    <div class="actions">
+                        ${e.id !== activeEventId ? `<button onclick="setActive('${e.id}')">Set Active</button>` : ''}
+                        <button class="secondary" onclick="removeEvent('${e.id}')">Remove</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+</html>
