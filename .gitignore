@@ -1,3 +1,14 @@
+# Source code (keep private - use build.py to compile)
+main.py
+build.py
+
+# Compiled extensions and executables (built locally)
+*.so
+*.pyd
+*.c
+build/
+*.spec
+
 # Python
 __pycache__/
 *.pyc
@@ -22,6 +33,9 @@ Thumbs.db
 
 # Consent file
 .consent
+
+# Local config (sensitive - DO NOT PUSH)
+config_local.py
 
 # Admin-only files (don't push to public repo)
 manage_events.py

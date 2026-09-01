@@ -3,6 +3,7 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/Security-Compiled%20Binary-red.svg" alt="Security">
   <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
 </p>
 
@@ -25,8 +26,17 @@
 
 ```bash
 pip install -r requirements.txt
-python main.py
+python run.py
 ```
+
+---
+
+## 🔒 Security
+
+This application is compiled to a binary extension to protect against:
+- **Reverse engineering** - Source code cannot be recovered
+- **Man-in-the-middle attacks** - SSL verification enforced
+- **Tampering** - Code integrity verification
 
 ---
 
@@ -34,7 +44,8 @@ python main.py
 
 ```
 horizons-event-fix/
-├── main.py                    # Main script - check registration
+├── run.py                     # Run the compiled application
+├── main.cpython-314-darwin.so # Compiled binary (macOS)
 ├── events.json                # Current events data
 ├── requirements.txt           # Python dependencies
 ├── vercel.json                # Vercel deployment config
@@ -64,7 +75,7 @@ horizons-event-fix/
                                                         │
                                                         ▼
 ┌─────────────────┐                             ┌─────────────────┐
-│  Show result:   │◀──── User runs main.py ─────│  Fetch active   │
+│  Show result:   │◀──── User runs run.py ──────│  Fetch active   │
 │  ✅ Registered  │                             │  event from API │
 │  ❌ Not Registered│                            └─────────────────┘
 └─────────────────┘
@@ -92,6 +103,9 @@ A: Chrome, Firefox, Safari, Edge, Brave, Opera, Chromium
 
 **Q: Do I need to install Python?**  
 A: No! The install script does everything for you.
+
+**Q: Why is the code compiled?**  
+A: To protect against reverse engineering and ensure code integrity.
 
 ---
 
