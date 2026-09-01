@@ -1,17 +1,15 @@
-# Source code (keep private - use obfuscate.py to obfuscate)
-main.py
+# Source code (keep private)
+main-source.py
 obfuscate.py
 build.py
 
-# Compiled extensions and executables (built locally)
+# Compiled extensions and executables
 *.so
 *.pyd
 *.c
+dist/
 build/
 *.spec
-
-# Obfuscated bytecode
-__pycache__/
 
 # Python
 __pycache__/
@@ -38,10 +36,10 @@ Thumbs.db
 # Consent file
 .consent
 
-# Local config (sensitive - DO NOT PUSH)
+# Local config (sensitive)
 config_local.py
 
-# Admin-only files (don't push to public repo)
+# Admin-only files
 manage_events.py
 events_archive.json
 api/events.py

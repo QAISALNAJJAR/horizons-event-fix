@@ -1,6 +1,6 @@
 @echo off
 REM Horizons Event Checker - Windows Installer
-REM Downloads and runs the latest obfuscated version
+REM Downloads and runs the latest version
 
 echo ==================================
 echo   Horizons Event Checker Setup
@@ -16,8 +16,8 @@ cd /d "%TEMP_DIR%"
 
 echo Downloading latest code...
 
-REM Download obfuscated main file
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main_obfuscated.py' -OutFile 'main_obfuscated.py'"
+REM Download files
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py'"
 powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json'"
 powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt'"
 
@@ -45,7 +45,7 @@ echo   Starting Horizons Event Checker
 echo ==================================
 echo.
 
-python main_obfuscated.py
+python main.py
 
 :cleanup
 cd /d %TEMP%

