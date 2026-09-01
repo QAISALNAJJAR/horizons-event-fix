@@ -13,96 +13,61 @@
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Download
 
-### One-Click Install (Recommended)
+### Option 1: Pre-built Executable (No Python needed!)
 
-| Platform | Command |
-|----------|---------|
-| Windows | Double-click `install/install.bat` |
-| macOS/Linux | Run `./install/install.sh` |
+| Platform | Download |
+|----------|----------|
+| 🪟 **Windows** | [Download https://github.com/QAISALNAJJAR/horizons-event-fix/releases]() |
+| 🍎 **macOS** (Intel) | [Download https://github.com/QAISALNAJJAR/horizons-event-fix/releases]() |
+| 🍎 **macOS** (Apple Silicon) | [Download https://github.com/QAISALNAJJAR/horizons-event-fix/releases]() |
+| 🐧 **Linux** | [Download https://github.com/QAISALNAJJAR/horizons-event-fix/releases]() |
 
-### Manual Install
+### Option 2: One-Click Installer
+
+**Windows:**
+1. Download `install.bat`
+2. Double-click to run
+
+**macOS/Linux:**
+1. Download `install.sh`
+2. Run in terminal:
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+### Option 3: From Source (Developers Only)
 
 ```bash
+git clone https://github.com/QAISALNAJJAR/horizons-event-fix.git
+cd horizons-event-fix
 pip install -r requirements.txt
-python run.py
+python main.py
 ```
 
 ---
 
 ## 🔒 Security
 
-This application is compiled to a binary extension to protect against:
+This application is compiled to protect against:
 - **Reverse engineering** - Source code cannot be recovered
 - **Man-in-the-middle attacks** - SSL verification enforced
-- **Tampering** - Code integrity verification
-
----
-
-## 📁 Project Structure
-
-```
-horizons-event-fix/
-├── run.py                     # Run the compiled application
-├── main.cpython-314-darwin.so # Compiled binary (macOS)
-├── events.json                # Current events data
-├── requirements.txt           # Python dependencies
-├── vercel.json                # Vercel deployment config
-│
-├── api/                       # Vercel serverless API
-│   └── event.py              # GET active event
-│
-├── dashboard/                 # Web dashboard
-│   └── index.html            # Admin dashboard UI
-│
-├── install/                   # One-click installers
-│   ├── install.sh            # macOS/Linux installer
-│   └── install.bat           # Windows installer
-│
-└── README.md                  # This file
-```
-
----
-
-## 🔧 How It Works
-
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│  Admin manages  │────▶│  Push to GitHub │────▶│ Vercel deploys  │
-│  events via API │     │  (auto)         │     │ (auto)          │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-                                                        │
-                                                        ▼
-┌─────────────────┐                             ┌─────────────────┐
-│  Show result:   │◀──── User runs run.py ──────│  Fetch active   │
-│  ✅ Registered  │                             │  event from API │
-│  ❌ Not Registered│                            └─────────────────┘
-└─────────────────┘
-```
-
----
-
-## 📋 Requirements
-
-| Requirement | Auto-Installed |
-|-------------|----------------|
-| Python 3.8+ | ✅ Yes |
-| requests | ✅ Yes |
-| browser-cookie3 | ✅ Yes |
+- **Code tampering** - Integrity verification built-in
 
 ---
 
 ## ❓ FAQ
 
+**Q: Do I need to install Python?**  
+A: No! Download the pre-built executable for your platform.
+
 **Q: Is my data safe?**  
-A: Yes! The script only reads your browser cookies locally. Nothing is shared.
+A: Yes! The app only reads your browser cookies locally. Nothing is shared.
 
 **Q: What browsers are supported?**  
 A: Chrome, Firefox, Safari, Edge, Brave, Opera, Chromium
-
-**Q: Do I need to install Python?**  
-A: No! The install script does everything for you.
 
 **Q: Why is the code compiled?**  
 A: To protect against reverse engineering and ensure code integrity.
