@@ -20,10 +20,13 @@
         .event-item { background: #0f3460; padding: 12px; margin: 8px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
         .event-item.active { border: 2px solid #e94560; }
         .event-item .title { font-weight: 500; }
-        .event-item .id { font-size: 12px; color: #888; }
+        .event-item .id { font-size: 11px; color: #888; word-break: break-all; }
         .event-item .actions button { width: auto; padding: 6px 12px; margin: 0 4px; font-size: 14px; }
         .badge { background: #e94560; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
         .logout { position: absolute; top: 20px; right: 20px; width: auto; padding: 8px 16px; }
+        .status { text-align: center; padding: 8px; border-radius: 4px; margin: 8px 0; font-size: 14px; }
+        .status.success { background: #1b4332; color: #95d5b2; }
+        .status.error { background: #641220; color: #ffccd5; }
     </style>
 </head>
 <body>
@@ -41,9 +44,10 @@
         <div class="container">
             <h1>📅 Event Manager</h1>
             
-            <input type="text" id="eventIdInput" placeholder="Event ID (e.g., 3b68b316-6f6d-4a40-ae99-1476da708be8)">
+            <input type="text" id="eventIdInput" placeholder="Event ID">
             <input type="text" id="eventTitleInput" placeholder="Event Title (optional)">
             <button onclick="addEvent()">Add Event</button>
+            <div id="statusMsg"></div>
             
             <div class="event-list" id="eventList"></div>
         </div>
@@ -51,18 +55,36 @@
 
     <script>
         const PASSWORD = 'horizons2026';
-        const STORAGE_KEY = 'horizons_events';
-        const ACTIVE_KEY = 'horizons_active';
+        const API_URL = '/api/events';
+        
+        let events = [];
+        let activeEventId = null;
 
-        let events = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-        let activeEventId = localStorage.getItem(ACTIVE_KEY) || null;
+        function showStatus(msg, isError = false) {
+            const el = document.getElementById('statusMsg');
+            el.textContent = msg;
+            el.className = 'status ' + (isError ? 'error' : 'success');
+            setTimeout(() => el.textContent = '', 3000);
+        }
 
-        function login() {
+        async function apiCall(method, body = null) {
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + PASSWORD
+            };
+            const options = { method, headers };
+            if (body) options.body = JSON.stringify(body);
+            
+            const res = await fetch(API_URL, options);
+            return res.json();
+        }
+
+        async function login() {
             const input = document.getElementById('passwordInput').value;
             if (input === PASSWORD) {
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                renderEvents();
+                await loadEvents();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
@@ -74,43 +96,44 @@
             document.getElementById('passwordInput').value = '';
         }
 
-        function save() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
-            localStorage.setItem(ACTIVE_KEY, activeEventId);
+        async function loadEvents() {
+            const data = await apiCall('GET');
+            events = data.events || [];
+            activeEventId = data.activeEventId;
+            renderEvents();
         }
 
-        function addEvent() {
+        async function addEvent() {
             const id = document.getElementById('eventIdInput').value.trim();
             const title = document.getElementById('eventTitleInput').value.trim() || 'Untitled Event';
             
-            if (!id) return alert('Please enter an event ID');
+            if (!id) return showStatus('Please enter an event ID', true);
             
-            const existing = events.find(e => e.id === id);
-            if (existing) {
-                existing.title = title;
+            const result = await apiCall('POST', { action: 'add', id, title });
+            if (result.success) {
+                showStatus('Event added!');
+                await loadEvents();
+                document.getElementById('eventIdInput').value = '';
+                document.getElementById('eventTitleInput').value = '';
             } else {
-                events.push({ id, title });
+                showStatus(result.error || 'Failed to add event', true);
             }
-            
-            if (!activeEventId) activeEventId = id;
-            
-            save();
-            renderEvents();
-            document.getElementById('eventIdInput').value = '';
-            document.getElementById('eventTitleInput').value = '';
         }
 
-        function removeEvent(id) {
-            events = events.filter(e => e.id !== id);
-            if (activeEventId === id) activeEventId = events.length > 0 ? events[0].id : null;
-            save();
-            renderEvents();
+        async function removeEvent(id) {
+            const result = await apiCall('POST', { action: 'remove', id });
+            if (result.success) {
+                showStatus('Event removed!');
+                await loadEvents();
+            }
         }
 
-        function setActive(id) {
-            activeEventId = id;
-            save();
-            renderEvents();
+        async function setActive(id) {
+            const result = await apiCall('POST', { action: 'setActive', id });
+            if (result.success) {
+                showStatus('Active event updated!');
+                await loadEvents();
+            }
         }
 
         function renderEvents() {

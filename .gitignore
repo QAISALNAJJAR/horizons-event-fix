@@ -1,0 +1,13 @@
+# Consent file
+.consent
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Database
+*.db
+
+# OS
+.DS_Store

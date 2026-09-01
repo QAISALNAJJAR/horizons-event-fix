@@ -150,19 +150,41 @@ def get_browser_user_agent(browser_name):
     
     return None
 
-print("\n📋 Quick Note:")
-print("This tool checks your event registration status on horizons-pal.net.")
-print("It only uses info from your browser - nothing is shared.\n")
+CONSENT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.consent')
 
-consent = input("Continue? (yes/no): ").strip().lower()
-if consent in ['yes', 'y', 'ye', 'yeah', 'yep', 'sure', 'ok', 'okay']:
-    print()
-elif consent in ['no', 'n', 'nah', 'nope']:
-    print("Exiting.")
-    exit(0)
-else:
-    print("Invalid input. Exiting.")
-    exit(0)
+def hide_file_windows(filepath):
+    """Hide file on Windows."""
+    if platform.system() == 'Windows':
+        import ctypes
+        ctypes.windll.kernel32.SetFileAttributesW(filepath, 0x02)
+
+def check_consent():
+    """Check if user has already given consent."""
+    if os.path.exists(CONSENT_FILE):
+        return True
+    return False
+
+def save_consent():
+    """Save consent to file."""
+    with open(CONSENT_FILE, 'w') as f:
+        f.write('accepted')
+    hide_file_windows(CONSENT_FILE)
+
+if not check_consent():
+    print("\n📋 Quick Note:")
+    print("This tool checks your event registration status on horizons-pal.net.")
+    print("It only uses info from your browser - nothing is shared.\n")
+
+    consent = input("Continue? (yes/no): ").strip().lower()
+    if consent in ['yes', 'y', 'ye', 'yeah', 'yep', 'sure', 'ok', 'okay']:
+        save_consent()
+        print()
+    elif consent in ['no', 'n', 'nah', 'nope']:
+        print("Exiting.")
+        exit(0)
+    else:
+        print("Invalid input. Exiting.")
+        exit(0)
 
 # Fetch active event from Vercel dashboard
 DASHBOARD_URL = 'https://students-beta.vercel.app/api/event'
@@ -170,14 +192,13 @@ DASHBOARD_URL = 'https://students-beta.vercel.app/api/event'
 print("\nFetching active event...")
 try:
     response = requests.get(DASHBOARD_URL, timeout=10)
-    print(f"response: {response.text}")
     if response.status_code == 200:
         data = response.json()
         active_event = data.get('activeEvent')
         if active_event:
             event_id = active_event['id']
             event_title = active_event.get('title', 'Unknown')
-            print(f"Event: {event_title}")
+            print(f"\n📅 Active Event: {event_title}")
         else:
             print("No active event set in dashboard.")
             exit(0)

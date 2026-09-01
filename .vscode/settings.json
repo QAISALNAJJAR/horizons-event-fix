@@ -1,0 +1,8 @@
+{
+    "files.exclude": {
+        "**/.consent": true,
+        "**/.DS_Store": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true
+    }
+}
