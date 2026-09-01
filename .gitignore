@@ -1,16 +1,30 @@
-# Manage events
-manage_events.py
-
-# Consent file
-.consent
-
 # Python
 __pycache__/
 *.pyc
 *.pyo
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env
 
 # Database
 *.db
 
 # OS
 .DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Consent file
+.consent
+
+# Admin-only files (don't push to public repo)
+manage_events.py
+events_archive.json
+api/events.py
+notes.txt

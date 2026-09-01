@@ -2,7 +2,6 @@
 
 # Horizons Event Checker - One-Click Install & Run
 # For macOS/Linux
-# This script auto-installs Python, downloads the latest code, and runs it
 
 echo "=================================="
 echo "  Horizons Event Checker Setup"
@@ -44,12 +43,17 @@ echo ""
 echo "Downloading latest code from GitHub..."
 echo ""
 
-# Download main.py from GitHub
+# Create temp directory
+TEMP_DIR=$(mktemp -d)
+cd "$TEMP_DIR"
+
+# Download files from GitHub
 curl -sL "$GITHUB_RAW/main.py" -o main.py
 curl -sL "$GITHUB_RAW/events.json" -o events.json
+curl -sL "$GITHUB_RAW/requirements.txt" -o requirements.txt
 
 echo "Installing required packages..."
-pip3 install --break-system-packages requests browser-cookie3 2>/dev/null || pip3 install requests browser-cookie3
+pip3 install --break-system-packages -r requirements.txt 2>/dev/null || pip3 install -r requirements.txt
 
 echo ""
 echo "=================================="
@@ -58,3 +62,7 @@ echo "=================================="
 echo ""
 
 python3 main.py
+
+# Cleanup
+cd -
+rm -rf "$TEMP_DIR"

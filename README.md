@@ -14,100 +14,71 @@
 
 ## 🚀 Quick Start
 
-### Option 1: Easy Install (Recommended)
+### One-Click Install (Recommended)
 
-**Windows:**
-1. Download [`install.bat`](install.bat)
-2. Double-click to run
-3. Done! 🎉
+| Platform | Command |
+|----------|---------|
+| Windows | Double-click `install/install.bat` |
+| macOS/Linux | Run `./install/install.sh` |
 
-**macOS/Linux:**
-1. Download [`install.sh`](install.sh)
-2. Run in terminal:
+### Manual Install
+
 ```bash
-chmod +x install.sh
-./install.sh
+pip install -r requirements.txt
+python main.py
 ```
 
-### Option 2: Manual Install
+---
 
-```bash
-# Clone the repo
-git clone https://github.com/QAISALNAJJAR/horizons-event-fix.git
-cd horizons-event-fix
+## 📁 Project Structure
 
-# Install dependencies
-pip install requests browser-cookie3
+```
+horizons-event-fix/
+├── main.py                    # Main script - check registration
+├── events.json                # Current events data
+├── requirements.txt           # Python dependencies
+├── vercel.json                # Vercel deployment config
+│
+├── api/                       # Vercel serverless API
+│   └── event.py              # GET active event
+│
+├── dashboard/                 # Web dashboard
+│   └── index.html            # Admin dashboard UI
+│
+├── install/                   # One-click installers
+│   ├── install.sh            # macOS/Linux installer
+│   └── install.bat           # Windows installer
+│
+└── README.md                  # This file
+```
 
-# Run
-python main.py
+---
+
+## 🔧 How It Works
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Admin manages  │────▶│  Push to GitHub │────▶│ Vercel deploys  │
+│  events via API │     │  (auto)         │     │ (auto)          │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+                                                        │
+                                                        ▼
+┌─────────────────┐                             ┌─────────────────┐
+│  Show result:   │◀──── User runs main.py ─────│  Fetch active   │
+│  ✅ Registered  │                             │  event from API │
+│  ❌ Not Registered│                            └─────────────────┘
+└─────────────────┘
 ```
 
 ---
 
 ## 📋 Requirements
 
-| Requirement | Auto-Installed? |
-|-------------|-----------------|
+| Requirement | Auto-Installed |
+|-------------|----------------|
 | Python 3.8+ | ✅ Yes |
 | requests | ✅ Yes |
 | browser-cookie3 | ✅ Yes |
-
----
-
-## 🔧 For Admins: Setting Up the Dashboard
-
-### Step 1: Deploy to Vercel
-
-1. Push this repo to GitHub
-2. Go to [vercel.com](https://vercel.com) → Import your repo
-3. Click Deploy
-
-### Step 2: Update the URL
-
-In `main.py`, change:
-```python
-DASHBOARD_URL = 'https://your-project.vercel.app/api/event'
-```
-
-### Step 3: Manage Events
-
-1. Go to `https://your-project.vercel.app`
-2. Login with password: `horizons2026`
-3. Add events and set one as **Active**
-
----
-
-## 🔐 Change Dashboard Password
-
-Edit `dashboard/index.html`:
-```javascript
-const PASSWORD = 'your-new-password';
-```
-
----
-
-## 📱 How It Works
-
-```
-┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
-│   Admin Panel   │────▶│  Vercel Hosted  │────▶│  User's Script  │
-│   (Dashboard)   │     │     API         │     │   (main.py)     │
-└─────────────────┘     └─────────────────┘     └─────────────────┘
-        │                                               │
-        │                                               ▼
-        │                                       ┌─────────────────┐
-        │                                       │  Check Browser  │
-        │                                       │    Cookies      │
-        │                                       └─────────────────┘
-        │                                               │
-        ▼                                               ▼
-┌─────────────────┐                             ┌─────────────────┐
-│  Set Active     │                             │  Show Result:   │
-│  Event ID       │                             │  ✅ Registered  │
-└─────────────────┘                             │  ❌ Not Registered│
-                                                └─────────────────┘
-```
 
 ---
 
