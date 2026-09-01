@@ -27,10 +27,6 @@ echo.
 
 set GITHUB_REPO=QAISALNAJJAR/horizons-event-fix
 
-REM Get the directory where this script is located
-set SCRIPT_DIR=%~dp0
-set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
-
 REM Create temp directory
 set TEMP_DIR=%TEMP%\horizons-checker
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
