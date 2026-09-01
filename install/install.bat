@@ -1,6 +1,6 @@
 @echo off
-REM Horizons Event Checker - One-Click Install and Run (Windows)
-REM This script downloads the pre-built executable
+REM Horizons Event Checker - Windows Installer
+REM Downloads and runs the latest obfuscated version
 
 echo ==================================
 echo   Horizons Event Checker Setup
@@ -14,36 +14,38 @@ set TEMP_DIR=%TEMP%\horizons-checker
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 cd /d "%TEMP_DIR%"
 
-echo Downloading latest release...
+echo Downloading latest code...
 
-REM Download pre-built binary from GitHub Releases
-powershell -Command "try { Invoke-WebRequest -Uri 'https://github.com/%GITHUB_REPO%/releases/latest/download/horizons-checker-windows.exe' -OutFile 'horizons-checker.exe' -ErrorAction Stop; exit 0 } catch { exit 1 }"
+REM Download obfuscated main file
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main_obfuscated.py' -OutFile 'main_obfuscated.py'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt'"
 
-if exist horizons-checker.exe (
+REM Check if Python is installed
+python --version >nul 2>&1
+if errorlevel 1 (
+    echo Python is not installed!
     echo.
-    echo ==================================
-    echo   Starting Horizons Event Checker
-    echo ==================================
+    echo Please install Python from:
+    echo https://www.python.org/downloads/
     echo.
-    horizons-checker.exe
+    echo IMPORTANT: Check "Add Python to PATH" during installation!
+    echo.
+    pause
     goto :cleanup
 )
 
+REM Install dependencies
+echo Installing dependencies...
+pip install -r requirements.txt
+
 echo.
-echo ==============================================================
-echo   PRE-BUILT BINARY NOT AVAILABLE
-echo ==============================================================
+echo ==================================
+echo   Starting Horizons Event Checker
+echo ==================================
 echo.
-echo   Please download manually from:
-echo   https://github.com/%GITHUB_REPO%/releases
-echo.
-echo   Or build from source:
-echo   1. Install Python from https://www.python.org/downloads/
-echo   2. Run: pip install requests browser-cookie3
-echo   3. Run: python main.py
-echo.
-echo ==============================================================
-echo.
+
+python main_obfuscated.py
 
 :cleanup
 cd /d %TEMP%

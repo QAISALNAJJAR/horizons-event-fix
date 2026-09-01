@@ -1,5 +1,6 @@
-# Source code (keep private - use build.py to compile)
+# Source code (keep private - use obfuscate.py to obfuscate)
 main.py
+obfuscate.py
 build.py
 
 # Compiled extensions and executables (built locally)
@@ -8,6 +9,9 @@ build.py
 *.c
 build/
 *.spec
+
+# Obfuscated bytecode
+__pycache__/
 
 # Python
 __pycache__/

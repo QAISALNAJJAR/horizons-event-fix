@@ -10,58 +10,49 @@ echo ""
 
 GITHUB_REPO="QAISALNAJJAR/horizons-event-fix"
 
-# Detect platform
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    PLATFORM="macos"
-    if [[ $(uname -m) == "arm64" ]]; then
-        FILE="horizons-checker-macos-arm"
-    else
-        FILE="horizons-checker-macos-intel"
-    fi
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    PLATFORM="linux"
-    FILE="horizons-checker-linux"
-else
-    PLATFORM="macos"
-    FILE="horizons-checker-macos-intel"
-fi
-
-echo "Detected platform: $PLATFORM"
-
 # Create temp directory
 TEMP_DIR=$(mktemp -d)
 cd "$TEMP_DIR"
 
-echo "Downloading latest release..."
+echo "Downloading latest code..."
 
-# Download pre-built binary from GitHub Releases
-DOWNLOAD_URL="https://github.com/$GITHUB_REPO/releases/latest/download/$FILE"
+# Download obfuscated main file
+curl -sL "https://raw.githubusercontent.com/$GITHUB_REPO/main/main_obfuscated.py" -o main_obfuscated.py
+curl -sL "https://raw.githubusercontent.com/$GITHUB_REPO/main/events.json" -o events.json
+curl -sL "https://raw.githubusercontent.com/$GITHUB_REPO/main/requirements.txt" -o requirements.txt
 
-if curl -sL "$DOWNLOAD_URL" -o horizons-checker 2>/dev/null; then
-    chmod +x horizons-checker
-    echo "✅ Downloaded pre-built binary!"
-    echo ""
-    echo "=================================="
-    echo "  Starting Horizons Event Checker"
-    echo "=================================="
-    echo ""
-    ./horizons-checker
-else
-    echo ""
-    echo "=============================================================="
-    echo "  PRE-BUILT BINARY NOT AVAILABLE"
-    echo "=============================================================="
-    echo ""
-    echo "  Please download manually from:"
-    echo "  https://github.com/$GITHUB_REPO/releases"
-    echo ""
-    echo "  Or build from source:"
-    echo "  1. Install Python from https://www.python.org/downloads/"
-    echo "  2. Run: pip install requests browser-cookie3"
-    echo "  3. Run: python main.py"
-    echo ""
-    echo "=============================================================="
+# Check if Python 3 is installed
+if ! command -v python3 &> /dev/null; then
+    echo "Python 3 not found. Installing..."
+    
+    # macOS
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        if command -v brew &> /dev/null; then
+            brew install python
+        else
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            brew install python
+        fi
+    # Linux
+    else
+        sudo apt update && sudo apt install -y python3 python3-pip 2>/dev/null || \
+        sudo dnf install -y python3 python3-pip 2>/dev/null || \
+        sudo yum install -y python3 python3-pip 2>/dev/null
+    fi
 fi
+
+echo "Python 3 found: $(python3 --version)"
+echo ""
+echo "Installing required packages..."
+pip3 install --break-system-packages -r requirements.txt 2>/dev/null || pip3 install -r requirements.txt
+
+echo ""
+echo "=================================="
+echo "  Starting Horizons Event Checker"
+echo "=================================="
+echo ""
+
+python3 main_obfuscated.py
 
 # Cleanup
 cd -
