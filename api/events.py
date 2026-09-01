@@ -4,18 +4,37 @@ import os
 
 API_PASSWORD = 'horizons2026'
 
+# Default events data (used as initial data)
+DEFAULT_EVENTS = {
+    "events": [
+        {
+            "id": "3b68b316-6f6d-4a40-ae99-1476da708be8",
+            "title": "UWC Boarding School Info Session"
+        }
+    ],
+    "activeEventId": "3b68b316-6f6d-4a40-ae99-1476da708be8"
+}
+
 def get_events_data():
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
+    """Get events from Vercel KV or fallback to default."""
     try:
-        with open(events_file, 'r') as f:
-            return json.load(f)
+        from vercel_kv import KV
+        kv = KV()
+        data = kv.get('events_data')
+        if data:
+            return json.loads(data) if isinstance(data, str) else data
     except:
-        return {'events': [], 'activeEventId': None}
+        pass
+    return DEFAULT_EVENTS.copy()
 
 def save_events_data(data):
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    with open(events_file, 'w') as f:
-        json.dump(data, f, indent=2)
+    """Save events to Vercel KV."""
+    try:
+        from vercel_kv import KV
+        kv = KV()
+        kv.set('events_data', json.dumps(data))
+    except:
+        pass
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):

