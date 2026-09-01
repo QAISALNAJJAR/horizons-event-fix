@@ -1,108 +1,65 @@
 @echo off
 REM Horizons Event Checker - Windows Installer
-REM Downloads and runs the latest version
 
-REM Log output for debugging
-echo Starting installer... > "%TEMP%\horizons-install.log"
-date /t >> "%TEMP%\horizons-install.log"
-time /t >> "%TEMP%\horizons-install.log"
+echo Starting... > "%TEMP%\horizons.log" 2>&1
 
-REM Check if running as admin
+REM Check admin
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
 if '%errorlevel%' NEQ '0' (
+    echo NOT ADMIN >> "%TEMP%\horizons.log" 2>&1
     echo.
-    echo ==============================================================
-    echo   PLEASE RUN AS ADMINISTRATOR
-    echo ==============================================================
-    echo.
-    echo   Right-click this file and select "Run as administrator"
-    echo.
-    echo ==============================================================
+    echo PLEASE RUN AS ADMINISTRATOR
+    echo Right-click -^> Run as administrator
     echo.
     pause
     exit /B
 )
 
-echo Running as administrator... >> "%TEMP%\horizons-install.log"
+echo IS ADMIN >> "%TEMP%\horizons.log" 2>&1
 
-set GITHUB_REPO=QAISALNAJJAR/horizons-event-fix
-
-REM Create temp directory
 set TEMP_DIR=%TEMP%\horizons-checker
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 cd /d "%TEMP_DIR%"
 
-echo Working directory: %TEMP_DIR% >> "%TEMP%\horizons-install.log"
+echo DIR: %TEMP_DIR% >> "%TEMP%\horizons.log" 2>&1
 
-REM Check if Python is installed
-python --version >nul 2>&1
+REM Check Python
+python --version >> "%TEMP%\horizons.log" 2>&1
 if errorlevel 1 (
-    echo Python not found. Installing automatically...
+    echo Python not found! >> "%TEMP%\horizons.log" 2>&1
     echo.
+    echo Python not found. Downloading...
     
-    REM Download Python installer
-    echo Downloading Python...
-    echo Downloading Python installer... >> "%TEMP%\horizons-install.log"
-    powershell -Command "try { Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix'; echo Download success >> '%TEMP%\horizons-install.log' } catch { echo Download failed >> '%TEMP%\horizons-install.log'; exit 1 }"
+    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe' -OutFile '%TEMP%\python.exe'"
+    %TEMP%\python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
     
-    REM Try to install Python silently
-    echo Installing Python (this may take a few minutes)...
-    echo Installing Python... >> "%TEMP%\horizons-install.log"
-    powershell -Command "Add-AppxPackage -Path '%TEMP%\python-manager.msix'"
-    
-    REM Check if installation succeeded
-    python --version >nul 2>&1
+    python --version >> "%TEMP%\horizons.log" 2>&1
     if errorlevel 1 (
-        echo.
-        echo ==============================================================
-        echo   AUTO-INSTALL FAILED
-        echo ==============================================================
-        echo.
-        echo   Please install Python manually:
-        echo   1. Open this file: %TEMP%\python-manager.msix
-        echo   2. Follow the installation wizard
-        echo   3. Re-run this installer
-        echo.
-        echo   Or download from: https://www.python.org/downloads/
-        echo.
-        echo ==============================================================
-        echo.
+        echo Python install failed! >> "%TEMP%\horizons.log" 2>&1
+        echo Failed to install Python!
         pause
         goto :cleanup
     )
-    
-    echo Python installed successfully!
-    echo.
-) else (
-    echo Python found:
-    python --version
 )
 
+echo Downloading code... >> "%TEMP%\horizons.log" 2>&1
+echo.
 echo Downloading latest code...
 
-REM Download files
-powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py' } catch { echo Failed to download main.py!; pause; goto :cleanup }"
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json'"
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/QAISALNAJJAR/horizons-event-fix/main/main.py' -OutFile 'main.py'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/QAISALNAJJAR/horizons-event-fix/main/events.json' -OutFile 'events.json'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/QAISALNAJJAR/horizons-event-fix/main/requirements.txt' -OutFile 'requirements.txt'"
 
-REM Install dependencies
-echo.
 echo Installing dependencies...
+echo Installing deps... >> "%TEMP%\horizons.log" 2>&1
 pip install -r requirements.txt
 
 echo.
-echo ==================================
-echo   Starting Horizons Event Checker
-echo ==================================
+echo Starting Horizons Event Checker...
 echo.
-
 python main.py
 
 :cleanup
 echo.
-echo Press any key to exit...
+echo Done. Check log: %TEMP%\horizons.log
 pause
-
-REM Cleanup
-cd /d %TEMP%
-rd /s /q "%TEMP_DIR%" 2>nul
