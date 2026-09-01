@@ -27,6 +27,7 @@
         .status { text-align: center; padding: 8px; border-radius: 4px; margin: 8px 0; font-size: 14px; }
         .status.success { background: #1b4332; color: #95d5b2; }
         .status.error { background: #641220; color: #ffccd5; }
+        .status.loading { background: #0f3460; color: #aaa; }
     </style>
 </head>
 <body>
@@ -60,11 +61,13 @@
         let events = [];
         let activeEventId = null;
 
-        function showStatus(msg, isError = false) {
+        function showStatus(msg, type = '') {
             const el = document.getElementById('statusMsg');
             el.textContent = msg;
-            el.className = 'status ' + (isError ? 'error' : 'success');
-            setTimeout(() => el.textContent = '', 3000);
+            el.className = 'status ' + type;
+            if (type !== 'loading') {
+                setTimeout(() => el.textContent = '', 5000);
+            }
         }
 
         async function apiCall(method, body = null) {
@@ -107,32 +110,40 @@
             const id = document.getElementById('eventIdInput').value.trim();
             const title = document.getElementById('eventTitleInput').value.trim() || 'Untitled Event';
             
-            if (!id) return showStatus('Please enter an event ID', true);
+            if (!id) return showStatus('Please enter an event ID', 'error');
+            
+            showStatus('Saving to GitHub...', 'loading');
             
             const result = await apiCall('POST', { action: 'add', id, title });
             if (result.success) {
-                showStatus('Event added!');
+                showStatus('✅ ' + result.message, 'success');
                 await loadEvents();
                 document.getElementById('eventIdInput').value = '';
                 document.getElementById('eventTitleInput').value = '';
             } else {
-                showStatus(result.error || 'Failed to add event', true);
+                showStatus('❌ ' + (result.error || 'Failed'), 'error');
             }
         }
 
         async function removeEvent(id) {
+            showStatus('Saving...', 'loading');
             const result = await apiCall('POST', { action: 'remove', id });
             if (result.success) {
-                showStatus('Event removed!');
+                showStatus('✅ ' + result.message, 'success');
                 await loadEvents();
+            } else {
+                showStatus('❌ ' + (result.error || 'Failed'), 'error');
             }
         }
 
         async function setActive(id) {
+            showStatus('Saving...', 'loading');
             const result = await apiCall('POST', { action: 'setActive', id });
             if (result.success) {
-                showStatus('Active event updated!');
+                showStatus('✅ ' + result.message, 'success');
                 await loadEvents();
+            } else {
+                showStatus('❌ ' + (result.error || 'Failed'), 'error');
             }
         }
 

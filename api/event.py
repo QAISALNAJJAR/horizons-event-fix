@@ -1,38 +1,14 @@
 from http.server import BaseHTTPRequestHandler
 import json
-import urllib.request
-
-# JSONBin.io free API
-JSONBIN_ID = '6a96ed54f5f4af5e295d224b'
-JSONBIN_API_KEY = '$2a$10$f/iO1sJfQqWXCMn1A494BuUH.qTmIzEyc6EesZB2wnLcmXXffXBUy'
-JSONBIN_URL = f'https://api.jsonbin.io/v3/b/{JSONBIN_ID}'
-
-DEFAULT_EVENTS = {
-    "events": [
-        {
-            "id": "3b68b316-6f6d-4a40-ae99-1476da708be8",
-            "title": "UWC Boarding School Info Session"
-        }
-    ],
-    "activeEventId": "3b68b316-6f6d-4a40-ae99-1476da708be8"
-}
+import os
 
 def get_events_data():
-    """Get events from JSONBin.io or fallback to default."""
+    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
     try:
-        req = urllib.request.Request(
-            f'{JSONBIN_URL}/latest',
-            headers={
-                'X-Access-Key': JSONBIN_API_KEY,
-                'X-Bin-Meta': 'false'
-            }
-        )
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode())
-            return data.get('record', data)
+        with open(events_file, 'r') as f:
+            return json.load(f)
     except:
-        pass
-    return DEFAULT_EVENTS.copy()
+        return {'events': [], 'activeEventId': None}
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
