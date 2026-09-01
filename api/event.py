@@ -1,8 +1,17 @@
 import json
 import os
+from http.server import BaseHTTPRequestHandler
 
-def handler(request):
-    # Enable CORS
+# Read events from JSON file
+def get_events_data():
+    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
+    try:
+        with open(events_file, 'r') as f:
+            return json.load(f)
+    except:
+        return {'events': [], 'activeEventId': None}
+
+def app(request):
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -13,13 +22,7 @@ def handler(request):
     if request.method == 'OPTIONS':
         return ('', 200, headers)
     
-    # Read events from JSON file
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    try:
-        with open(events_file, 'r') as f:
-            data = json.load(f)
-    except:
-        data = {'events': [], 'activeEventId': None}
+    data = get_events_data()
     
     if request.method == 'GET':
         active_event = None

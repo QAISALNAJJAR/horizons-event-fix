@@ -1,11 +1,17 @@
 import json
 import os
 
-# Simple password protection
 API_PASSWORD = 'horizons2026'
 
-def handler(request):
-    # Enable CORS
+def get_events_data():
+    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
+    try:
+        with open(events_file, 'r') as f:
+            return json.load(f)
+    except:
+        return {'events': [], 'activeEventId': None}
+
+def app(request):
     headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -21,13 +27,7 @@ def handler(request):
     if not auth_header.startswith('Bearer ') or auth_header[7:] != API_PASSWORD:
         return (json.dumps({'error': 'Unauthorized'}), 401, headers)
     
-    # Read events from JSON file
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    try:
-        with open(events_file, 'r') as f:
-            data = json.load(f)
-    except:
-        data = {'events': [], 'activeEventId': None}
+    data = get_events_data()
     
     if request.method == 'GET':
         return (json.dumps(data), 200, headers)
@@ -43,11 +43,9 @@ def handler(request):
                 if not event_id:
                     return (json.dumps({'error': 'Missing event id'}), 400, headers)
                 
-                # Remove if exists
                 data['events'] = [e for e in data['events'] if e['id'] != event_id]
                 data['events'].append({'id': event_id, 'title': title})
                 
-                # Set as active if first event
                 if not data.get('activeEventId'):
                     data['activeEventId'] = event_id
                     
@@ -64,7 +62,7 @@ def handler(request):
                 else:
                     return (json.dumps({'error': 'Event not found'}), 404, headers)
             
-            # Save to file
+            events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
             with open(events_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
