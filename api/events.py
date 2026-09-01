@@ -1,62 +1,83 @@
+from http.server import BaseHTTPRequestHandler
 import json
-import os
 
 API_PASSWORD = 'horizons2026'
 
-def app(request):
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-    }
+DEFAULT_EVENTS = {
+    "events": [
+        {
+            "id": "3b68b316-6f6d-4a40-ae99-1476da708be8",
+            "title": "UWC Boarding School Info Session"
+        }
+    ],
+    "activeEventId": "3b68b316-6f6d-4a40-ae99-1476da708be8"
+}
+
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        auth = self.headers.get('Authorization', '')
+        if not auth.startswith('Bearer ') or auth[7:] != API_PASSWORD:
+            self.send_response(401)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'Unauthorized'}).encode())
+            return
+        
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps(DEFAULT_EVENTS).encode())
     
-    # Check authorization
-    auth_header = request.headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer ') or auth_header[7:] != API_PASSWORD:
-        return (json.dumps({'error': 'Unauthorized'}), 401, headers)
-    
-    # Read events from JSON file
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    try:
-        with open(events_file, 'r') as f:
-            data = json.load(f)
-    except:
-        data = {'events': [], 'activeEventId': None}
-    
-    if request.method == 'POST':
+    def do_POST(self):
+        auth = self.headers.get('Authorization', '')
+        if not auth.startswith('Bearer ') or auth[7:] != API_PASSWORD:
+            self.send_response(401)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'Unauthorized'}).encode())
+            return
+        
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length)
+        
         try:
-            body = json.loads(request.body)
-            action = body.get('action')
+            data = json.loads(body)
+            action = data.get('action')
             
             if action == 'add':
-                event_id = body.get('id')
-                title = body.get('title', 'Untitled')
-                if not event_id:
-                    return (json.dumps({'error': 'Missing event id'}), 400, headers)
-                
-                data['events'] = [e for e in data['events'] if e['id'] != event_id]
-                data['events'].append({'id': event_id, 'title': title})
-                
-                if not data.get('activeEventId'):
-                    data['activeEventId'] = event_id
+                event_id = data.get('id')
+                title = data.get('title', 'Untitled')
+                DEFAULT_EVENTS['events'] = [e for e in DEFAULT_EVENTS['events'] if e['id'] != event_id]
+                DEFAULT_EVENTS['events'].append({'id': event_id, 'title': title})
+                if not DEFAULT_EVENTS.get('activeEventId'):
+                    DEFAULT_EVENTS['activeEventId'] = event_id
                     
             elif action == 'remove':
-                event_id = body.get('id')
-                data['events'] = [e for e in data['events'] if e['id'] != event_id]
-                if data.get('activeEventId') == event_id:
-                    data['activeEventId'] = data['events'][0]['id'] if data['events'] else None
+                event_id = data.get('id')
+                DEFAULT_EVENTS['events'] = [e for e in DEFAULT_EVENTS['events'] if e['id'] != event_id]
+                if DEFAULT_EVENTS.get('activeEventId') == event_id:
+                    DEFAULT_EVENTS['activeEventId'] = DEFAULT_EVENTS['events'][0]['id'] if DEFAULT_EVENTS['events'] else None
                     
             elif action == 'setActive':
-                event_id = body.get('id')
-                if any(e['id'] == event_id for e in data['events']):
-                    data['activeEventId'] = event_id
-                else:
-                    return (json.dumps({'error': 'Event not found'}), 404, headers)
+                event_id = data.get('id')
+                if any(e['id'] == event_id for e in DEFAULT_EVENTS['events']):
+                    DEFAULT_EVENTS['activeEventId'] = event_id
             
-            with open(events_file, 'w') as f:
-                json.dump(data, f, indent=2)
-            
-            return (json.dumps({'success': True, 'data': data}), 200, headers)
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True, 'data': DEFAULT_EVENTS}).encode())
         except Exception as e:
-            return (json.dumps({'error': str(e)}), 400, headers)
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': str(e)}).encode())
     
-    return (json.dumps(data), 200, headers)
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.end_headers()

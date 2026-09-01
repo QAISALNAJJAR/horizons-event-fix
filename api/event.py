@@ -1,29 +1,40 @@
+from http.server import BaseHTTPRequestHandler
+from urllib.parse import urlparse
 import json
-import os
 
-def app(request):
-    headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-    }
+# Default events data
+DEFAULT_EVENTS = {
+    "events": [
+        {
+            "id": "3b68b316-6f6d-4a40-ae99-1476da708be8",
+            "title": "UWC Boarding School Info Session"
+        }
+    ],
+    "activeEventId": "3b68b316-6f6d-4a40-ae99-1476da708be8"
+}
+
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        active_event = None
+        for event in DEFAULT_EVENTS.get('events', []):
+            if event['id'] == DEFAULT_EVENTS.get('activeEventId'):
+                active_event = event
+                break
+        
+        response = json.dumps({
+            'activeEvent': active_event,
+            'allEvents': DEFAULT_EVENTS.get('events', [])
+        })
+        
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(response.encode('utf-8'))
     
-    # Read events from JSON file
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    try:
-        with open(events_file, 'r') as f:
-            data = json.load(f)
-    except:
-        data = {'events': [], 'activeEventId': None}
-    
-    active_event = None
-    for event in data.get('events', []):
-        if event['id'] == data.get('activeEventId'):
-            active_event = event
-            break
-    
-    body = json.dumps({
-        'activeEvent': active_event,
-        'allEvents': data.get('events', [])
-    })
-    
-    return (body, 200, headers)
+    def do_OPTIONS(self):
+        self.send_response(200)
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.end_headers()

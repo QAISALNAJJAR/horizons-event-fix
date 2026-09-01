@@ -170,6 +170,7 @@ DASHBOARD_URL = 'https://students-beta.vercel.app/api/event'
 print("\nFetching active event...")
 try:
     response = requests.get(DASHBOARD_URL, timeout=10)
+    print(f"response: {response.text}")
     if response.status_code == 200:
         data = response.json()
         active_event = data.get('activeEvent')
