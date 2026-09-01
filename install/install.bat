@@ -22,14 +22,32 @@ if errorlevel 1 (
     
     REM Download Python installer
     echo Downloading Python...
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.12.5/python-3.12.5-amd64.exe' -OutFile '%TEMP%\python-installer.exe'"
+    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix'"
     
-    REM Install Python silently with PATH enabled
+    REM Try to install Python silently
     echo Installing Python (this may take a few minutes)...
-    %TEMP%\python-installer.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
+    powershell -Command "Add-AppxPackage -Path '%TEMP%\python-manager.msix'"
     
-    REM Refresh PATH for current session
-    set "PATH=%PATH%;%LOCALAPPDATA%\Programs\Python\Python312;%LOCALAPPDATA%\Programs\Python\Python312\Scripts;%ProgramFiles%\Python312;%ProgramFiles%\Python312\Scripts"
+    REM Check if installation succeeded
+    python --version >nul 2>&1
+    if errorlevel 1 (
+        echo.
+        echo ==============================================================
+        echo   AUTO-INSTALL FAILED
+        echo ==============================================================
+        echo.
+        echo   Please install Python manually:
+        echo   1. Open this file: %TEMP%\python-manager.msix
+        echo   2. Follow the installation wizard
+        echo   3. Re-run this installer
+        echo.
+        echo   Or download from: https://www.python.org/downloads/
+        echo.
+        echo ==============================================================
+        echo.
+        pause
+        goto :cleanup
+    )
     
     echo Python installed successfully!
     echo.
