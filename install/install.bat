@@ -2,10 +2,10 @@
 REM Horizons Event Checker - Windows Installer
 REM Downloads and runs the latest version
 
-echo ==================================
-echo   Horizons Event Checker Setup
-echo ==================================
-echo.
+REM Log output for debugging
+echo Starting installer... > "%TEMP%\horizons-install.log"
+date /t >> "%TEMP%\horizons-install.log"
+time /t >> "%TEMP%\horizons-install.log"
 
 REM Check if running as admin
 >nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
@@ -23,12 +23,16 @@ if '%errorlevel%' NEQ '0' (
     exit /B
 )
 
+echo Running as administrator... >> "%TEMP%\horizons-install.log"
+
 set GITHUB_REPO=QAISALNAJJAR/horizons-event-fix
 
 REM Create temp directory
 set TEMP_DIR=%TEMP%\horizons-checker
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
 cd /d "%TEMP_DIR%"
+
+echo Working directory: %TEMP_DIR% >> "%TEMP%\horizons-install.log"
 
 REM Check if Python is installed
 python --version >nul 2>&1
@@ -38,10 +42,12 @@ if errorlevel 1 (
     
     REM Download Python installer
     echo Downloading Python...
-    powershell -Command "try { Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix' } catch { echo Download failed!; exit 1 }"
+    echo Downloading Python installer... >> "%TEMP%\horizons-install.log"
+    powershell -Command "try { Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix'; echo Download success >> '%TEMP%\horizons-install.log' } catch { echo Download failed >> '%TEMP%\horizons-install.log'; exit 1 }"
     
     REM Try to install Python silently
     echo Installing Python (this may take a few minutes)...
+    echo Installing Python... >> "%TEMP%\horizons-install.log"
     powershell -Command "Add-AppxPackage -Path '%TEMP%\python-manager.msix'"
     
     REM Check if installation succeeded
@@ -75,20 +81,14 @@ if errorlevel 1 (
 echo Downloading latest code...
 
 REM Download files
-powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py' } catch { echo Failed to download main.py!; exit 1 }"
-powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json' } catch { echo Failed to download events.json!; exit 1 }"
-powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt' } catch { echo Failed to download requirements.txt!; exit 1 }"
+powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py' } catch { echo Failed to download main.py!; pause; goto :cleanup }"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json'"
+powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt'"
 
 REM Install dependencies
 echo.
 echo Installing dependencies...
 pip install -r requirements.txt
-if errorlevel 1 (
-    echo.
-    echo Failed to install dependencies!
-    pause
-    goto :cleanup
-)
 
 echo.
 echo ==================================
