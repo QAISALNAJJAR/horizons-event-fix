@@ -14,16 +14,12 @@ def handler(request):
     }
     
     if request.method == 'OPTIONS':
-        return {'statusCode': 200, 'headers': headers, 'body': ''}
+        return ('', 200, headers)
     
     # Check authorization
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer ') or auth_header[7:] != API_PASSWORD:
-        return {
-            'statusCode': 401,
-            'headers': headers,
-            'body': json.dumps({'error': 'Unauthorized'})
-        }
+        return (json.dumps({'error': 'Unauthorized'}), 401, headers)
     
     # Read events from JSON file
     events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
@@ -34,11 +30,7 @@ def handler(request):
         data = {'events': [], 'activeEventId': None}
     
     if request.method == 'GET':
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': json.dumps(data)
-        }
+        return (json.dumps(data), 200, headers)
     
     elif request.method == 'POST':
         try:
@@ -49,7 +41,7 @@ def handler(request):
                 event_id = body.get('id')
                 title = body.get('title', 'Untitled')
                 if not event_id:
-                    return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'Missing event id'})}
+                    return (json.dumps({'error': 'Missing event id'}), 400, headers)
                 
                 # Remove if exists
                 data['events'] = [e for e in data['events'] if e['id'] != event_id]
@@ -70,26 +62,14 @@ def handler(request):
                 if any(e['id'] == event_id for e in data['events']):
                     data['activeEventId'] = event_id
                 else:
-                    return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'Event not found'})}
+                    return (json.dumps({'error': 'Event not found'}), 404, headers)
             
             # Save to file
             with open(events_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({'success': True, 'data': data})
-            }
+            return (json.dumps({'success': True, 'data': data}), 200, headers)
         except Exception as e:
-            return {
-                'statusCode': 400,
-                'headers': headers,
-                'body': json.dumps({'error': str(e)})
-            }
+            return (json.dumps({'error': str(e)}), 400, headers)
     
-    return {
-        'statusCode': 405,
-        'headers': headers,
-        'body': json.dumps({'error': 'Method not allowed'})
-    }
+    return (json.dumps({'error': 'Method not allowed'}), 405, headers)

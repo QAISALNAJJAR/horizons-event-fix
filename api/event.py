@@ -11,7 +11,7 @@ def handler(request):
     }
     
     if request.method == 'OPTIONS':
-        return {'statusCode': 200, 'headers': headers, 'body': ''}
+        return ('', 200, headers)
     
     # Read events from JSON file
     events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
@@ -28,17 +28,9 @@ def handler(request):
                 active_event = event
                 break
         
-        return {
-            'statusCode': 200,
-            'headers': headers,
-            'body': json.dumps({
-                'activeEvent': active_event,
-                'allEvents': data.get('events', [])
-            })
-        }
+        return (json.dumps({
+            'activeEvent': active_event,
+            'allEvents': data.get('events', [])
+        }), 200, headers)
     
-    return {
-        'statusCode': 405,
-        'headers': headers,
-        'body': json.dumps({'error': 'Method not allowed'})
-    }
+    return (json.dumps({'error': 'Method not allowed'}), 405, headers)
