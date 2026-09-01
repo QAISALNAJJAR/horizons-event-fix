@@ -27,6 +27,10 @@ echo.
 
 set GITHUB_REPO=QAISALNAJJAR/horizons-event-fix
 
+REM Get the directory where this script is located
+set SCRIPT_DIR=%~dp0
+set SCRIPT_DIR=%SCRIPT_DIR:~0,-1%
+
 REM Create temp directory
 set TEMP_DIR=%TEMP%\horizons-checker
 if not exist "%TEMP_DIR%" mkdir "%TEMP_DIR%"
@@ -86,9 +90,6 @@ echo.
 echo Installing dependencies...
 pip install -r requirements.txt
 
-cls
-
-
 echo.
 echo ==================================
 echo   Starting Horizons Event Checker
@@ -97,8 +98,11 @@ echo.
 
 python main.py
 
+:cleanup
+echo.
+echo Press any key to exit...
+pause >nul
+
 REM Cleanup
 cd /d %TEMP%
 rd /s /q "%TEMP_DIR%" 2>nul
-
-pause
