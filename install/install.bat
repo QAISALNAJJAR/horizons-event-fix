@@ -7,6 +7,22 @@ echo   Horizons Event Checker Setup
 echo ==================================
 echo.
 
+REM Check if running as admin
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+if '%errorlevel%' NEQ '0' (
+    echo.
+    echo ==============================================================
+    echo   PLEASE RUN AS ADMINISTRATOR
+    echo ==============================================================
+    echo.
+    echo   Right-click this file and select "Run as administrator"
+    echo.
+    echo ==============================================================
+    echo.
+    pause
+    exit /B
+)
+
 set GITHUB_REPO=QAISALNAJJAR/horizons-event-fix
 
 REM Create temp directory
@@ -22,7 +38,7 @@ if errorlevel 1 (
     
     REM Download Python installer
     echo Downloading Python...
-    powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix'"
+    powershell -Command "try { Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/pymanager/python-manager-26.3.msix' -OutFile '%TEMP%\python-manager.msix' } catch { echo Download failed!; exit 1 }"
     
     REM Try to install Python silently
     echo Installing Python (this may take a few minutes)...
@@ -59,14 +75,20 @@ if errorlevel 1 (
 echo Downloading latest code...
 
 REM Download files
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py'"
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json'"
-powershell -Command "Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt'"
+powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/main.py' -OutFile 'main.py' } catch { echo Failed to download main.py!; exit 1 }"
+powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/events.json' -OutFile 'events.json' } catch { echo Failed to download events.json!; exit 1 }"
+powershell -Command "try { Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/%GITHUB_REPO%/main/requirements.txt' -OutFile 'requirements.txt' } catch { echo Failed to download requirements.txt!; exit 1 }"
 
 REM Install dependencies
 echo.
 echo Installing dependencies...
 pip install -r requirements.txt
+if errorlevel 1 (
+    echo.
+    echo Failed to install dependencies!
+    pause
+    goto :cleanup
+)
 
 echo.
 echo ==================================
@@ -76,8 +98,11 @@ echo.
 
 python main.py
 
+:cleanup
+echo.
+echo Press any key to exit...
+pause
+
 REM Cleanup
 cd /d %TEMP%
 rd /s /q "%TEMP_DIR%" 2>nul
-
-pause
