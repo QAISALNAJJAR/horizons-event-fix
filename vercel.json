@@ -13,6 +13,6 @@
   "routes": [
     { "src": "/api/event", "dest": "/api/event.py" },
     { "src": "/api/events", "dest": "/api/events.py" },
-    { "src": "/(.*)", "dest": "/dashboard/index.html" }
+    { "src": "/", "dest": "/dashboard/index.html" }
   ]
 }

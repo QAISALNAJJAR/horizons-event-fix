@@ -165,7 +165,7 @@ else:
     exit(0)
 
 # Fetch active event from Vercel dashboard
-DASHBOARD_URL = 'https://your-project-name.vercel.app/api/event'
+DASHBOARD_URL = 'https://students-beta.vercel.app/api/event'
 
 print("\nFetching active event...")
 try:

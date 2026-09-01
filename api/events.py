@@ -3,36 +3,26 @@ import os
 
 API_PASSWORD = 'horizons2026'
 
-def get_events_data():
-    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
-    try:
-        with open(events_file, 'r') as f:
-            return json.load(f)
-    except:
-        return {'events': [], 'activeEventId': None}
-
 def app(request):
     headers = {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Content-Type': 'application/json'
     }
-    
-    if request.method == 'OPTIONS':
-        return ('', 200, headers)
     
     # Check authorization
     auth_header = request.headers.get('Authorization', '')
     if not auth_header.startswith('Bearer ') or auth_header[7:] != API_PASSWORD:
         return (json.dumps({'error': 'Unauthorized'}), 401, headers)
     
-    data = get_events_data()
+    # Read events from JSON file
+    events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
+    try:
+        with open(events_file, 'r') as f:
+            data = json.load(f)
+    except:
+        data = {'events': [], 'activeEventId': None}
     
-    if request.method == 'GET':
-        return (json.dumps(data), 200, headers)
-    
-    elif request.method == 'POST':
+    if request.method == 'POST':
         try:
             body = json.loads(request.body)
             action = body.get('action')
@@ -62,7 +52,6 @@ def app(request):
                 else:
                     return (json.dumps({'error': 'Event not found'}), 404, headers)
             
-            events_file = os.path.join(os.path.dirname(__file__), '..', 'events.json')
             with open(events_file, 'w') as f:
                 json.dump(data, f, indent=2)
             
@@ -70,4 +59,4 @@ def app(request):
         except Exception as e:
             return (json.dumps({'error': str(e)}), 400, headers)
     
-    return (json.dumps({'error': 'Method not allowed'}), 405, headers)
+    return (json.dumps(data), 200, headers)
