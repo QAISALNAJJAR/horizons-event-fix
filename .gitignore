@@ -3,6 +3,9 @@ main-source.py
 obfuscate.py
 build.py
 
+# Admin-only folder (private)
+admin-only/
+
 # Compiled extensions and executables
 *.so
 *.pyd
