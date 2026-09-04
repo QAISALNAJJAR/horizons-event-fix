@@ -1,2 +1,5 @@
 requests
 browser-cookie3
+customtkinter
+pillow
+pyinstaller
